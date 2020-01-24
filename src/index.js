@@ -93,12 +93,26 @@ class Popup extends React.Component {
     );
   }
 }
+class Task extends React.Component {
 
-class App extends React.Component {
+  render(){
+    return (
+      <tr>
+        <td>{this.props.descr}</td>
+        <td>{this.props.status}</td>
+        <td>{this.props.priority}</td>
+        <td>{this.props.planeDate}</td>
+        <td>{this.props.factDate}</td>
+        <td><button className="remove" onClick={() => this.props.removeTask()}>Удалить</button></td>
+      </tr>
+    );
+  }
+}
+
+class List extends React.Component {
   constructor (props) {
     super(props);
     this.state = {
-      showPopup: false,
       tasks: [
         {
           descr: 'task 1',
@@ -124,7 +138,61 @@ class App extends React.Component {
       ]
     }
   }
+  removeTask(key){
+    let tasks = this.state.tasks;
+    this.setState({
+      tasks : tasks.splice(key,1),
+    })
+  }
+  render() {
+    const tasks = this.state.tasks;
+    let list =[];
+    tasks.forEach((task,key) => {
+      if ((task.status == this.props.filter) || (this.props.filter == 0)){
+        list.push(
+            <Task
+              descr = {task.descr}
+              priority = {task.priority}
+              status = {task.status}
+              planeDate = {task.planeDate}
+              factDate = {task.factDate}
+              removeTask = {()=>this.removeTask(key)}
+              onClick={()=> this.props.onClick(key)}
+            />
+        );
+      }
+    });
 
+    return(
+      
+      <table>
+        <thead>
+          <tr>
+            <td>Описание</td>
+            <td>Статус</td>
+            <td>Приоритет</td>
+            <td>Плановая дата окончания</td>
+            <td>Фактическая дата окончания</td>
+            <td></td>
+          </tr>
+        </thead>
+        <tbody>
+            {list}
+        </tbody>
+      </table>
+    )
+  }
+}
+
+class App extends React.Component {
+  constructor (props) {
+    super(props);
+    this.state = {
+      showPopup : false,
+      filter : 0,
+      search: '',
+    }
+  }
 
   togglePopup() {
     this.setState({
@@ -132,26 +200,19 @@ class App extends React.Component {
     });
   }
 
-
-  render() {
-    const tasks = this.state.tasks;
-    const list = tasks.map((task, num) => {
-      //если дата в DateFormat
-      // const planeDateInFormat = 
-      //           task.planeDate.getDate() + 
-      //           "." + (+task.planeDate.getMonth()+1) +
-      //           "." + task.planeDate.getFullYear();
-      return (
-        <tr>
-            <td>{task.descr}</td>
-            <td>{task.status}</td>
-            <td>{task.priority}</td>
-            <td>{task.planeDate}</td>
-            <td>{task.factDate}</td>
-            <td><button className="remove" onClick={() => this.removeTask(num)}>Удалить</button></td>
-        </tr>
-      );
+  setFilter (event){
+    this.setState({
+      filter: event.target.value,
     })
+  }
+  setSearch (event){
+    // event.preventDefault();
+    this.setState({
+      search: event.target.search,
+    })
+  }
+  render() {
+
     return (
       <div className="app">
         {this.state.showPopup ? 
@@ -164,41 +225,34 @@ class App extends React.Component {
         <h1>CRUD Задачи</h1>
         <div className="tools">
           <button className="assTask" onClick={() => this.togglePopup()}>Добавить задачу</button>
-          <form className="findTask-form">
-            <input type="text" className="findTask__input" placeholder="Описание задачи"/>
-            <button className="findTask__btn">Поиск</button>
-          </form>
+          {/* <form className="findTask-form" onSubmit={this.setSearch}> */}
+            <input type="text" className="findTask__input" value={this.state.value} onChange={this.setSearch} placeholder="Описание задачи"/>
+            {/* <button className="findTask__btn" type="submit">Поиск</button> */}
+          {/* </form> */}
 
-          <div className="filters">
-            <button className="filter-all active">
-              Всего - 4
-            </button>
-            <button className="filter-news">
-              Новых - 4
-            </button>
-            <button className="filter-is">
-              В работе - 4
-            </button>
-            <button className="filter-complete">
-              Завершено - 4
-            </button>
+          <div className="filters" onChange={this.setFilter.bind(this)}>
+            <label>
+              <input type="radio" name="filter" value="0"/>
+              Всего - {/*countAll */}
+            </label>
+            <label>
+              <input type="radio" name="filter" value="1"/>
+              Новых - {/*countNew */}
+            </label>
+            <label>
+              <input type="radio" name="filter" value="2"/>
+              В работе - {/*countInProcess */}
+            </label>
+            <label>
+              <input type="radio" name="filter" value="3"/>
+              Завершено - {/*countComplete */}
+            </label>
           </div>
         </div> 
-        <table>
-          <thead>
-            <tr>
-              <td>Описание</td>
-              <td>Статус</td>
-              <td>Приоритет</td>
-              <td>Плановая дата окончания</td>
-              <td>Фактическая дата окончания</td>
-              <td></td>
-            </tr>
-          </thead>
-          <tbody>
-              {list}
-          </tbody>
-        </table>
+        <List
+          filter = {this.state.filter}
+          search = {this.state.search}
+        />
       </div>
 
     );
