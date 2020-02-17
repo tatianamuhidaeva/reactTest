@@ -150,14 +150,13 @@ class Task extends React.Component {
         break;
     }
     return (
-      <tr key={this.props.id}>
+      <tr key={this.props.id} onDoubleClick={() => this.props.togglePopup(this.props.id)}>
         <td>{this.props.descr}</td>
         <td>{status}</td>
         <td>{priority}</td>
         <td>{this.props.planeDate}</td>
         <td>{this.props.factDate}</td>
         <td>
-          <button className="editTaskBtn" onClick={() => this.props.togglePopup(this.props.id)}>Изменить задачу</button>
           <button className="remove" onClick={() => this.props.removeTask(this.props.id)}>Удалить</button>
         </td>
       </tr>
